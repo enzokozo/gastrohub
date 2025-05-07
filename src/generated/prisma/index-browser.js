@@ -120,9 +120,116 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
+exports.Prisma.UserScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  password: 'password',
+  userRole: 'userRole',
+  score: 'score'
+};
+
+exports.Prisma.ChefScalarFieldEnum = {
+  id: 'id',
+  cnpj: 'cnpj'
+};
+
+exports.Prisma.BookingScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  kitchenId: 'kitchenId',
+  date: 'date',
+  startTime: 'startTime',
+  endTime: 'endTime',
+  status: 'status'
+};
+
+exports.Prisma.KitchenScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  location: 'location',
+  capacity: 'capacity',
+  equipment: 'equipment',
+  score: 'score',
+  restaurantId: 'restaurantId'
+};
+
+exports.Prisma.PaymentScalarFieldEnum = {
+  id: 'id',
+  bookingId: 'bookingId',
+  value: 'value',
+  status: 'status',
+  paymentMethod: 'paymentMethod'
+};
+
+exports.Prisma.ReviewScalarFieldEnum = {
+  id: 'id',
+  rating: 'rating',
+  comment: 'comment',
+  userId: 'userId',
+  kitchenId: 'kitchenId'
+};
+
+exports.Prisma.ProductScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  price: 'price',
+  supplierId: 'supplierId'
+};
+
+exports.Prisma.SupplierScalarFieldEnum = {
+  id: 'id'
+};
+
+exports.Prisma.RestaurantScalarFieldEnum = {
+  id: 'id',
+  cnpj: 'cnpj'
+};
+
+exports.Prisma.SortOrder = {
+  asc: 'asc',
+  desc: 'desc'
+};
+
+exports.Prisma.QueryMode = {
+  default: 'default',
+  insensitive: 'insensitive'
+};
+
+exports.Prisma.NullsOrder = {
+  first: 'first',
+  last: 'last'
+};
+exports.UserRole = exports.$Enums.UserRole = {
+  CHEF: 'CHEF',
+  ENTREPRENEUR: 'ENTREPRENEUR',
+  RESTAURANT: 'RESTAURANT',
+  SUPPLIER: 'SUPPLIER'
+};
+
+exports.Status = exports.$Enums.Status = {
+  CANCELED: 'CANCELED',
+  CONFIRMED: 'CONFIRMED',
+  PENDING: 'PENDING'
+};
+
+exports.PaymentMethod = exports.$Enums.PaymentMethod = {
+  CREDIT_CARD: 'CREDIT_CARD',
+  DEBIT_CARD: 'DEBIT_CARD',
+  PIX: 'PIX'
+};
 
 exports.Prisma.ModelName = {
-
+  User: 'User',
+  Chef: 'Chef',
+  Booking: 'Booking',
+  Kitchen: 'Kitchen',
+  Payment: 'Payment',
+  Review: 'Review',
+  Product: 'Product',
+  Supplier: 'Supplier',
+  Restaurant: 'Restaurant'
 };
 
 /**
