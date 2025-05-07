@@ -13,3 +13,120 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+enum UserRole {
+  CHEF
+  ENTREPRENEUR
+  RESTAURANT
+  SUPPLIER
+}
+
+enum Status {
+  CANCELED
+  CONFIRMED
+  PENDING
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  DEBIT_CARD
+  PIX
+}
+
+model User {
+  id        Int       @id @default(autoincrement())
+  name      String
+  email     String    @unique
+  password  String
+  userRole  UserRole
+  score     Int       @default(0)
+
+  chef       Chef?
+  restaurant Restaurant?
+  supplier   Supplier?
+
+  Review Review[]
+
+  Booking Booking[]
+}
+
+model Chef {
+  id         Int      @id
+  user       User     @relation(fields: [id], references: [id])
+  cnpj       String
+  bookings   Booking[]
+}
+
+model Booking {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  kitchenId  Int
+  date       DateTime
+  startTime  DateTime
+  endTime    DateTime
+  status     Status
+
+  user       User     @relation(fields: [userId], references: [id])
+  kitchen    Kitchen  @relation(fields: [kitchenId], references: [id])
+  payment    Payment?
+
+  Chef Chef[]
+}
+
+model Kitchen {
+  id          Int       @id @default(autoincrement())
+  name        String
+  location    String
+  capacity    Int
+  equipment   String[]
+  score       Int       @default(0)
+
+  bookings    Booking[]
+  reviews     Review[]
+  restaurant  Restaurant? @relation(fields: [restaurantId], references: [id])
+  restaurantId Int?
+}
+
+model Payment {
+  id             Int            @id @default(autoincrement())
+  bookingId      Int @unique
+  value          Float
+  status         Status
+  paymentMethod  PaymentMethod
+
+  booking        Booking        @relation(fields: [bookingId], references: [id])
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  rating    Int
+  comment   String
+  userId    Int
+  kitchenId Int
+
+  user      User     @relation(fields: [userId], references: [id])
+  kitchen   Kitchen  @relation(fields: [kitchenId], references: [id])
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  description String
+  price       Float
+  supplierId  Int
+
+  supplier    Supplier  @relation(fields: [supplierId], references: [id])
+}
+
+model Supplier {
+  id          Int      @id
+  user        User     @relation(fields: [id], references: [id])
+  productList Product[]
+}
+
+model Restaurant {
+  id               Int        @id
+  user             User       @relation(fields: [id], references: [id])
+  cnpj             String
+  availableKitchens Kitchen[]
+}
