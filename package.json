@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "seed": "prisma db seed"
+    "seed": "prisma db seed",
+    "dev": "ts-node-dev src/index.ts"
   },
   "repository": {
     "type": "git",
@@ -18,7 +19,9 @@
   "homepage": "https://github.com/enzokozo/gastrohub#readme",
   "description": "",
   "devDependencies": {
-    "@types/node": "^22.14.0",
+    "@types/cors": "^2.8.18",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.15.18",
     "prisma": "^6.7.0",
     "ts-node": "^10.9.2",
     "ts-node-dev": "^2.0.0",
@@ -26,6 +29,8 @@
   },
   "dependencies": {
     "@prisma/client": "^6.7.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "gastrohub": "file:"
   },
   "prisma": {

@@ -1,19 +1,18 @@
 // This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// Learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
+// Prisma generator configuration to create the Prisma client
 generator client {
-  provider = "prisma-client-js"
-  output   = "../src/generated/prisma"
+  provider = "prisma-client-js"  // The client is generated using Prisma's client library for JavaScript/TypeScript
 }
 
+// Data source configuration for connecting to a PostgreSQL database
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"  // Defining PostgreSQL as the database provider
+  url      = env("DATABASE_URL")  // The connection URL for the PostgreSQL database, retrieved from the environment variable
 }
 
+// Enum for user roles, defining different types of users in the system
 enum UserRole {
   CHEF
   ENTREPRENEUR
@@ -21,112 +20,126 @@ enum UserRole {
   SUPPLIER
 }
 
+// Enum for different booking statuses, indicating the state of a booking
 enum Status {
   CANCELED
   CONFIRMED
   PENDING
 }
 
+// Enum for payment methods available in the system
 enum PaymentMethod {
   CREDIT_CARD
   DEBIT_CARD
   PIX
 }
 
+// Model for the "User" table, representing a user in the system
 model User {
-  id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  password  String
-  userRole  UserRole
-  score     Int       @default(0)
+  id        Int       @id @default(autoincrement())  // Unique user ID with auto-increment
+  name      String    // User's name
+  email     String    @unique  // Unique user email
+  password  String    // User's password
+  userRole  UserRole  // Role of the user (e.g., CHEF, RESTAURANT)
+  score     Int       @default(0)  // User's score, default is 0
 
-  chef       Chef?
+  // Relations to other models (Chef, Restaurant, Supplier, etc.)
+  chef      Chef?
   restaurant Restaurant?
   supplier   Supplier?
 
-  Review Review[]
-
-  Booking Booking[]
+  Review    Review[]  // One-to-many relationship with Review
+  Booking   Booking[] // One-to-many relationship with Booking
 }
 
+// Model for the "Chef" table, representing a chef
 model Chef {
-  id         Int      @id
-  user       User     @relation(fields: [id], references: [id])
-  cnpj       String
-  bookings   Booking[]
+  id         Int      @id  // Unique chef ID
+  userId     Int      @unique  // Foreign key reference to the User model
+  user       User     @relation(fields: [userId], references: [id])  // Relation to the User model
+  cnpj       String   // Chef's CNPJ (unique identifier for businesses in Brazil)
+  bookings   Booking[]  // One-to-many relationship with Booking
 }
 
+// Model for the "Booking" table, representing a booking made by a user for a kitchen
 model Booking {
-  id         Int      @id @default(autoincrement())
-  userId     Int
-  kitchenId  Int
-  date       DateTime
-  startTime  DateTime
-  endTime    DateTime
-  status     Status
+  id         Int      @id @default(autoincrement())  // Unique booking ID with auto-increment
+  userId     Int  // Foreign key to the User model (the user making the booking)
+  kitchenId  Int  // Foreign key to the Kitchen model (the kitchen being booked)
+  date       DateTime  // Date of the booking
+  startTime  DateTime  // Start time of the booking
+  endTime    DateTime  // End time of the booking
+  status     Status    // Booking status (CANCELED, CONFIRMED, PENDING)
 
-  user       User     @relation(fields: [userId], references: [id])
-  kitchen    Kitchen  @relation(fields: [kitchenId], references: [id])
-  payment    Payment?
+  user       User     @relation(fields: [userId], references: [id])  // Relation to the User model
+  kitchen    Kitchen  @relation(fields: [kitchenId], references: [id])  // Relation to the Kitchen model
+  payment    Payment?  // Optional one-to-one relation with Payment
 
-  Chef Chef[]
+  Chef Chef[]  // One-to-many relationship with Chef (for possible chef assignments)
 }
 
+// Model for the "Kitchen" table, representing a kitchen available for booking
 model Kitchen {
-  id          Int       @id @default(autoincrement())
-  name        String
-  location    String
-  capacity    Int
-  equipment   String[]
-  score       Int       @default(0)
+  id          Int       @id @default(autoincrement())  // Unique kitchen ID with auto-increment
+  name        String    // Name of the kitchen
+  location    String    // Location of the kitchen
+  capacity    Int       // Capacity of the kitchen (number of people it can accommodate)
+  equipment   String[]  // List of equipment available in the kitchen
+  score       Int       @default(0)  // Kitchen's score, default is 0
 
-  bookings    Booking[]
-  reviews     Review[]
-  restaurant  Restaurant? @relation(fields: [restaurantId], references: [id])
-  restaurantId Int?
+  bookings    Booking[]  // One-to-many relationship with Booking
+  reviews     Review[]   // One-to-many relationship with Review
+  restaurant  Restaurant? @relation(fields: [restaurantId], references: [id])  // Optional relation to Restaurant
+  restaurantId Int?  // Optional foreign key to the Restaurant model
 }
 
+// Model for the "Payment" table, representing a payment made for a booking
 model Payment {
-  id             Int            @id @default(autoincrement())
-  bookingId      Int @unique
-  value          Float
-  status         Status
-  paymentMethod  PaymentMethod
+  id             Int            @id @default(autoincrement())  // Unique payment ID with auto-increment
+  bookingId      Int @unique  // Foreign key to the Booking model (unique)
+  value          Float    // Payment value
+  status         Status   // Payment status (CANCELED, CONFIRMED, PENDING)
+  paymentMethod  PaymentMethod  // Payment method used (CREDIT_CARD, DEBIT_CARD, PIX)
 
-  booking        Booking        @relation(fields: [bookingId], references: [id])
+  booking        Booking        @relation(fields: [bookingId], references: [id])  // Relation to the Booking model
 }
 
+// Model for the "Review" table, representing a review left by a user for a kitchen
 model Review {
-  id        Int      @id @default(autoincrement())
-  rating    Int
-  comment   String
-  userId    Int
-  kitchenId Int
+  id        Int      @id @default(autoincrement())  // Unique review ID with auto-increment
+  rating    Int      // Rating given in the review (typically 1-5)
+  comment   String   // Comment left in the review
+  userId    Int      // Foreign key to the User model (the user leaving the review)
+  kitchenId Int      // Foreign key to the Kitchen model (the kitchen being reviewed)
 
-  user      User     @relation(fields: [userId], references: [id])
-  kitchen   Kitchen  @relation(fields: [kitchenId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])  // Relation to the User model
+  kitchen   Kitchen  @relation(fields: [kitchenId], references: [id])  // Relation to the Kitchen model
 }
 
+// Model for the "Product" table, representing a product provided by a supplier
 model Product {
-  id          Int       @id @default(autoincrement())
-  name        String
-  description String
-  price       Float
-  supplierId  Int
+  id          Int       @id @default(autoincrement())  // Unique product ID with auto-increment
+  name        String    // Product name
+  description String    // Description of the product
+  price       Float     // Price of the product
+  supplierId  Int       // Foreign key to the Supplier model
 
-  supplier    Supplier  @relation(fields: [supplierId], references: [id])
+  supplier    Supplier  @relation(fields: [supplierId], references: [id])  // Relation to the Supplier model
 }
 
+// Model for the "Supplier" table, representing a supplier providing products
 model Supplier {
-  id          Int      @id
-  user        User     @relation(fields: [id], references: [id])
-  productList Product[]
+  id          Int      @id  // Unique supplier ID
+  userId      Int      @unique  // Foreign key to the User model (the supplier's user)
+  user        User     @relation(fields: [userId], references: [id])  // Relation to the User model
+  productList Product[]  // One-to-many relationship with Product (products provided by the supplier)
 }
 
+// Model for the "Restaurant" table, representing a restaurant in the system
 model Restaurant {
-  id               Int        @id
-  user             User       @relation(fields: [id], references: [id])
-  cnpj             String
-  availableKitchens Kitchen[]
+  id               Int        @id  // Unique restaurant ID
+  userId           Int        @unique  // Foreign key to the User model (the restaurant's user)
+  user             User       @relation(fields: [userId], references: [id])  // Relation to the User model
+  cnpj             String     @unique  // CNPJ (unique business identifier in Brazil)
+  availableKitchens Kitchen[]  // One-to-many relationship with Kitchen (kitchens available in the restaurant)
 }
