@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: gastrohub-db
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: abacaxi33
+      POSTGRES_DB: gastrohub
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - gastrohub-network
+
+volumes:
+  postgres_data:
+
+networks:
+  gastrohub-network:
