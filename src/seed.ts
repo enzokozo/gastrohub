@@ -1,23 +1,18 @@
-import { PrismaClient, UserRole, Status, PaymentMethod } from '@prisma/client'
-import argon2 from 'argon2'
+import { PrismaClient, UserRole, Status, PaymentMethod } from '@prisma/client' // Import PrismaClient and enums from Prisma Client
+import argon2 from 'argon2' // Import Argon2 for password hashing
 
+// Initialize Prisma Client
 const prisma = new PrismaClient()
 
 async function main() {
   console.log('Launching the seed...');
+
+  // Hashing the default password for all users
   const hashedPassword = await argon2.hash('Senha@123');
 
-  // --- Apaga os dados na ordem correta ---
-  /*await prisma.payment.deleteMany()
-  await prisma.booking.deleteMany()
-  await prisma.review.deleteMany()
-  await prisma.product.deleteMany()
-  await prisma.kitchen.deleteMany()
-  await prisma.user.deleteMany()*/
+  // --- Creating users and related entities ---
 
-  // --- Cria usuários e dados relacionados ---
-
-  // Criando um usuário do tipo CHEF com CNPJ
+  // Create a CHEF user with CNPJ
   const chefUser = await prisma.user.create({
     data: {
       name: 'João Chef',
@@ -26,9 +21,9 @@ async function main() {
       userRole: UserRole.CHEF,
       cnpj: '12.345.678/0001-90',
     },
-  })
+  });
 
-  // Criando um usuário do tipo RESTAURANT com CNPJ
+  // Create a RESTAURANT user with CNPJ
   const restaurantUser = await prisma.user.create({
     data: {
       name: 'Restaurante Saboroso',
@@ -37,9 +32,9 @@ async function main() {
       userRole: UserRole.RESTAURANT,
       cnpj: '98.765.432/0001-10',
     },
-  })
+  });
 
-  // Criando um usuário do tipo SUPPLIER com produtos
+  // Create a SUPPLIER user with two products
   const supplierUser = await prisma.user.create({
     data: {
       name: 'Fornecedor Alimentos',
@@ -62,9 +57,9 @@ async function main() {
         ],
       },
     },
-  })
+  });
 
-  // Criando uma cozinha associada ao restaurante
+  // Create a kitchen associated with the RESTAURANT user
   const kitchen = await prisma.kitchen.create({
     data: {
       name: 'Cozinha Central',
@@ -73,9 +68,9 @@ async function main() {
       equipment: ['Fogão industrial', 'Geladeira', 'Freezer'],
       restaurantId: restaurantUser.id,
     },
-  })
+  });
 
-  // Criando uma reserva (booking) para o chef na cozinha
+  // Create a booking for the CHEF user in the kitchen, with a payment
   const booking = await prisma.booking.create({
     data: {
       userId: chefUser.id,
@@ -92,9 +87,9 @@ async function main() {
         },
       },
     },
-  })
+  });
 
-  // Criando uma avaliação (review) para a cozinha
+  // Create a review for the kitchen from the CHEF user
   await prisma.review.create({
     data: {
       rating: 5,
@@ -102,16 +97,17 @@ async function main() {
       userId: chefUser.id,
       kitchenId: kitchen.id,
     },
-  })
+  });
 
-  console.log('Seed successfully completed!')
+  console.log('Seed successfully completed!');
 }
 
+// Execute the seed and handle errors
 main()
   .catch((e) => {
-    console.error('Error running seed:', e)
-    process.exit(1)
+    console.error('Error running seed:', e);
+    process.exit(1);
   })
   .finally(async () => {
-    await prisma.$disconnect()
-  })
+    await prisma.$disconnect(); // Always disconnect from the database
+  });

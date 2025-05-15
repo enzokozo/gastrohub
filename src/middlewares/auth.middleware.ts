@@ -1,5 +1,5 @@
-import jwt from 'jsonwebtoken';
-import {Request, Response, NextFunction} from 'express';
+import jwt from 'jsonwebtoken'; // Import JWT library for token handling
+import {Request, Response, NextFunction} from 'express'; // Import types for request handling
 
 // Define the structure of the JWT payload
 interface JwtPayload {

@@ -1,10 +1,11 @@
-import {Prisma, PrismaClient} from "@prisma/client";
+import {Prisma, PrismaClient} from "@prisma/client"; // Import PrismaClient from Prisma Client
 
 // Initialize Prisma client to interact with the database
 const prisma = new PrismaClient();
 
 // Function to fetch all kitchens from the database
 export const getAllKitchens = async() => {
+    // Fetch all kitchens from the database
     const kitchens = await prisma.kitchen.findMany();
 
     return kitchens;
@@ -12,6 +13,7 @@ export const getAllKitchens = async() => {
 
 // Function to fetch a kitchen by its unique ID
 export const getKitchenByID = async(id: number) => {
+    // Find a kitchen in the database with the given ID
     const kitchen = await prisma.kitchen.findFirst({
         where: {
             id,
@@ -74,10 +76,12 @@ export const updateKitchen = async (id: number, data: CreateKitchenInput) => {
 
 // Function to delete a kitchen by its unique ID
 export const deleteKitchen = async (id: number) => {
+  // Find the kitchen with the given ID
   const kitchen = await prisma.kitchen.findFirst({
     where: { id },
   });
 
+  // Check if the kitchen exists
   if (!kitchen) {
     throw new Error("Kitchen not found or invalid ID");   
   }
