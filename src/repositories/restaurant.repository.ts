@@ -1,101 +1,104 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";  // Importing PrismaClient to interact with the database
 
 // Initialize Prisma client to interact with the database
 const prisma = new PrismaClient();
 
 // Function to fetch all restaurants from the database
 export const getAllRestaurants = async () => {
-  const restaurants = await prisma.restaurant.findMany({
-    include: {
-      user: true,  // Including user data related to each restaurant
+  const restaurants = await prisma.user.findMany({
+    where: {
+      userRole: 'RESTAURANT',
+    },
+    select: {
+      id: true,
+      name: true,
+      email: true,
+      userRole: true,
+      score: true,
+      cnpj: true,
     },
   });
 
-  // Mapping the output to merge user data directly at the restaurant level
-  return restaurants.map((restaurant) => ({
-    id: restaurant.id,
-    userRole: restaurant.user.userRole,  // Including the user's role
-    cnpj: restaurant.cnpj,  // Including the restaurant's CNPJ
-    name: restaurant.user.name,  // Including the user's name
-    email: restaurant.user.email,  // Including the user's email
-    score: restaurant.user.score,  // Including the user's score
-  }));
+  return restaurants;
 };
 
 // Function to fetch a restaurant by its unique ID
 export const getRestaurantByID = async (id: number) => {
-  const restaurant = await prisma.restaurant.findUnique({
-    where: { id },  // Searching for a unique restaurant by ID
-    include: { user: true },  // Including related user data
+  const restaurant = await prisma.user.findFirst({
+    where: {
+      id,
+      userRole: 'RESTAURANT',
+    },
   });
 
-  // If no restaurant is found, return null
+  // Return null if no restaurant is found
   if (!restaurant) return null;
 
-  // Return a structured object with restaurant and user information
+  // Return restaurant data
   return {
     id: restaurant.id,
-    userRole: restaurant.user.userRole,
+    userRole: restaurant.userRole,
     cnpj: restaurant.cnpj,
-    name: restaurant.user.name,
-    email: restaurant.user.email,
-    score: restaurant.user.score,
+    name: restaurant.name,
+    email: restaurant.email,
+    score: restaurant.score,
   };
 };
 
-// Interface for creating a new restaurant (data input validation)
+// Interface for creating a new restaurant user
 interface CreateRestaurantInput {
   name: string;
   email: string;
   password: string;
   score?: number;
   cnpj: string;
+  userRole: 'RESTAURANT';
 }
 
-// Function to create a new restaurant and associated user
+// Function to create a new restaurant user
 export const createRestaurant = async (data: CreateRestaurantInput) => {
-  return await prisma.restaurant.create({
+  return await prisma.user.create({
     data: {
-      // Creating a new user and associating it with the restaurant
-      user: {
-        create: {
-          name: data.name,
-          email: data.email,
-          password: data.password,
-          userRole: "RESTAURANT",  // Assigning the role "RESTAURANT"
-          score: data.score ?? 0,  // Default score is set to 0 if not provided
-        },
-      },
-      cnpj: data.cnpj,  // Setting the CNPJ (restaurant's unique identifier)
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      userRole: 'RESTAURANT',
+      score: data.score ?? 0,
+      cnpj: data.cnpj,
     },
   });
 };
 
 // Function to update an existing restaurant's details
 export const updateRestaurant = async (id: number, data: CreateRestaurantInput) => {
-  return await prisma.restaurant.update({
-    where: {
-      id: id,  // Identifying the restaurant to update by its ID
-    },
+  return await prisma.user.update({
+    where: { id },
     data: {
-      cnpj: data.cnpj,  // Updating the CNPJ of the restaurant
-      user: {
-        update: {
-          name: data.name,  // Updating the user's name
-          email: data.email,  // Updating the user's email
-          password: data.password,  // Updating the user's password
-          score: data.score ?? 0,  // Updating the score, defaulting to 0 if not provided
-        },
-      },
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      score: data.score ?? 0,
+      cnpj: data.cnpj,
     },
   });
 };
 
 // Function to delete a restaurant by its ID
 export const deleteRestaurant = async (id: number) => {
-  return await prisma.restaurant.delete({
+  // Check if user is a restaurant
+  const restaurant = await prisma.user.findFirst({
     where: {
-      id: id,  // Identifying the restaurant to delete by its ID
+      id,
+      userRole: 'RESTAURANT',
     },
+  });
+
+  if (!restaurant) {
+    throw new Error('Restaurant not found or invalid ID.');
+  }
+
+  // Delete the restaurant user
+  return await prisma.user.delete({
+    where: { id },
   });
 };

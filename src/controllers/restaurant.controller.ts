@@ -1,45 +1,45 @@
-import { RequestHandler, Request, Response } from "express";  // Importing types for request and response handlers
-import * as restaurantRepository from "../repositories/restaurant.repository";  // Importing repository functions for restaurant data handling
+import { RequestHandler } from "express";  // Import types for request handlers
+import * as restaurantRepository from "../repositories/restaurant.repository";  // Import restaurant repository
 
 // GET ALL RESTAURANTS
 export const getAllRestaurants: RequestHandler = async (req, res) => {
   try {
-    const restaurants = await restaurantRepository.getAllRestaurants();  // Fetching all restaurants from the repository
-    res.json(restaurants);  // Returning the list of restaurants in the response
-  } catch (error) {
-    res.status(500).json({ error: "Error while searching for restaurants" });  // Handling any errors that occur
+    const restaurants = await restaurantRepository.getAllRestaurants();  // Fetch all restaurants
+    res.json(restaurants);  // Return restaurants list
+  } catch {
+    res.status(500).json({ error: "Error while searching for restaurants" });  // Handle errors
   }
 };
 
 // GET RESTAURANT BY ID
 export const getRestaurantByID: RequestHandler = async (req, res) => {
-  const id = parseInt(req.params.id);  // Extracting the restaurant ID from the URL params (only id) and converting it to an integer
+  const id = parseInt(req.params.id);  // Parse restaurant ID from params
 
   if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid restaurant ID" });  // Handling case where ID is not a valid number
+    res.status(400).json({ error: "Invalid restaurant ID" });  // Validate ID
     return;
   }
 
   try {
-    const restaurant = await restaurantRepository.getRestaurantByID(id);  // Fetching the restaurant by ID from the repository
+    const restaurant = await restaurantRepository.getRestaurantByID(id);  // Fetch restaurant by ID
 
     if (!restaurant) {
-      res.status(404).json({ error: "Restaurant not found" });  // If the restaurant is not found, return 404
+      res.status(404).json({ error: "Restaurant not found" });  // Handle not found
       return;
     }
 
-    res.status(200).json(restaurant);  // Returning the restaurant details
-  } catch (error) {
-    res.status(500).json({ error: "Error while fetching restaurant" });  // Handling any errors that occur
+    res.status(200).json(restaurant);  // Return restaurant data
+  } catch {
+    res.status(500).json({ error: "Error while fetching restaurant" });  // Handle errors
   }
 };
 
 // CREATE RESTAURANT (POST)
 export const createRestaurant: RequestHandler = async (req, res) => {
-  const { name, email, password, score, cnpj } = req.body;  // Destructuring the request body to get restaurant details
+  const { name, email, password, score, cnpj } = req.body;  // Extract data from request body
 
   if (!name || !email || !password || !cnpj) {
-    res.status(400).json({ error: "Missing mandatory data." });  // Checking if mandatory data is missing
+    res.status(400).json({ error: "Missing mandatory data." });  // Validate mandatory fields
     return;
   }
 
@@ -50,26 +50,27 @@ export const createRestaurant: RequestHandler = async (req, res) => {
       password,
       score,
       cnpj,
-    });  // Creating a new restaurant by calling the repository function
+      userRole: 'RESTAURANT',
+    });  // Create new restaurant
 
-    res.status(201).json(newRestaurant);  // Returning the newly created restaurant with status 201
-  } catch (error) {
-    res.status(500).json({ error: "Error while creating restaurant" });  // Handling any errors that occur
+    res.status(201).json(newRestaurant);  // Return created restaurant
+  } catch {
+    res.status(500).json({ error: "Error while creating restaurant" });  // Handle errors
   }
 };
 
 // UPDATE RESTAURANT (PUT)
 export const updateRestaurant: RequestHandler = async (req, res) => {
-  const id = parseInt(req.params.id);  // Extracting the restaurant ID from the URL params (only id) and converting it to an integer
-  const { name, email, password, score, cnpj } = req.body;  // Extracting data from the request body
+  const id = parseInt(req.params.id);  // Parse restaurant ID
+  const { name, email, password, score, cnpj } = req.body;  // Extract update data
 
   if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid restaurant ID" });  // Handling invalid ID
+    res.status(400).json({ error: "Invalid restaurant ID" });  // Validate ID
     return;
   }
 
   if (!name || !email || !password || !cnpj) {
-    res.status(400).json({ error: "Missing mandatory data." });  // Checking if mandatory data is missing
+    res.status(400).json({ error: "Missing mandatory data." });  // Validate mandatory fields
     return;
   }
 
@@ -80,27 +81,28 @@ export const updateRestaurant: RequestHandler = async (req, res) => {
       password,
       score,
       cnpj,
-    });  // Calling the repository function to update the restaurant
+      userRole: 'RESTAURANT',
+    });  // Update restaurant data
 
-    res.status(200).json(updated);  // Returning the updated restaurant
-  } catch (error) {
-    res.status(500).json({ error: "Error while updating restaurant" });  // Handling any errors that occur
+    res.status(200).json(updated);  // Return updated restaurant
+  } catch {
+    res.status(500).json({ error: "Error while updating restaurant" });  // Handle errors
   }
 };
 
 // DELETE RESTAURANT
 export const deleteRestaurant: RequestHandler = async (req, res) => {
-  const id = parseInt(req.params.id);  // Extracting the restaurant ID from the URL params and converting it to an integer
+  const id = parseInt(req.params.id);  // Parse restaurant ID
 
   if (isNaN(id)) {
-    res.status(400).json({ error: "Invalid restaurant ID" });  // Handling invalid ID
+    res.status(400).json({ error: "Invalid restaurant ID" });  // Validate ID
     return;
   }
 
   try {
-    await restaurantRepository.deleteRestaurant(id);  // Calling the repository function to delete the restaurant
-    res.status(204).send();  // Returning a 204 status code indicating the deletion was successful with no content
-  } catch (error) {
-    res.status(500).json({ error: "Error while deleting restaurant" });  // Handling any errors that occur
+    await restaurantRepository.deleteRestaurant(id);  // Delete restaurant by ID
+    res.status(204).send();  // Return 204 No Content on success
+  } catch {
+    res.status(500).json({ error: "Error while deleting restaurant" });  // Handle errors
   }
 };

@@ -1,8 +1,18 @@
-import { PrismaClient, UserRole, Status, PaymentMethod } from '../src/generated/prisma'
+import { PrismaClient, UserRole, Status, PaymentMethod } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
 async function main() {
+  // --- Apaga os dados na ordem correta ---
+  await prisma.payment.deleteMany()
+  await prisma.booking.deleteMany()
+  await prisma.review.deleteMany()
+  await prisma.product.deleteMany()
+  await prisma.kitchen.deleteMany()
+  await prisma.user.deleteMany()
+
+  // --- Cria usuários e dados relacionados ---
+
   // Criando um usuário do tipo CHEF com CNPJ
   const chefUser = await prisma.user.create({
     data: {
@@ -10,11 +20,7 @@ async function main() {
       email: 'joao.chef@example.com',
       password: 'senha123',
       userRole: UserRole.CHEF,
-      chef: {
-        create: {
-          cnpj: '12.345.678/0001-90',
-        },
-      },
+      cnpj: '12.345.678/0001-90',
     },
   })
 
@@ -25,11 +31,7 @@ async function main() {
       email: 'contato@saboroso.com',
       password: 'senha123',
       userRole: UserRole.RESTAURANT,
-      restaurant: {
-        create: {
-          cnpj: '98.765.432/0001-10',
-        },
-      },
+      cnpj: '98.765.432/0001-10',
     },
   })
 
@@ -40,23 +42,20 @@ async function main() {
       email: 'vendas@fornecedor.com',
       password: 'senha123',
       userRole: UserRole.SUPPLIER,
-      supplier: {
-        create: {
-          productList: {
-            create: [
-              {
-                name: 'Arroz',
-                description: 'Arroz branco tipo 1',
-                price: 20.5,
-              },
-              {
-                name: 'Feijão',
-                description: 'Feijão carioca',
-                price: 8.75,
-              },
-            ],
+      cnpj: '11.222.333/0001-44',
+      products: {
+        create: [
+          {
+            name: 'Arroz',
+            description: 'Arroz branco tipo 1',
+            price: 20.5,
           },
-        },
+          {
+            name: 'Feijão',
+            description: 'Feijão carioca',
+            price: 8.75,
+          },
+        ],
       },
     },
   })
@@ -68,9 +67,7 @@ async function main() {
       location: 'Rua das Flores, 123',
       capacity: 10,
       equipment: ['Fogão industrial', 'Geladeira', 'Freezer'],
-      restaurant: {
-        connect: { id: restaurantUser.id },
-      },
+      restaurantId: restaurantUser.id,
     },
   })
 
