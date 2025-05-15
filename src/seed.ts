@@ -1,15 +1,19 @@
 import { PrismaClient, UserRole, Status, PaymentMethod } from '@prisma/client'
+import argon2 from 'argon2'
 
 const prisma = new PrismaClient()
 
 async function main() {
+  console.log('Launching the seed...');
+  const hashedPassword = await argon2.hash('Senha@123');
+
   // --- Apaga os dados na ordem correta ---
-  await prisma.payment.deleteMany()
+  /*await prisma.payment.deleteMany()
   await prisma.booking.deleteMany()
   await prisma.review.deleteMany()
   await prisma.product.deleteMany()
   await prisma.kitchen.deleteMany()
-  await prisma.user.deleteMany()
+  await prisma.user.deleteMany()*/
 
   // --- Cria usuários e dados relacionados ---
 
@@ -18,7 +22,7 @@ async function main() {
     data: {
       name: 'João Chef',
       email: 'joao.chef@example.com',
-      password: 'senha123',
+      password: hashedPassword,
       userRole: UserRole.CHEF,
       cnpj: '12.345.678/0001-90',
     },
@@ -29,7 +33,7 @@ async function main() {
     data: {
       name: 'Restaurante Saboroso',
       email: 'contato@saboroso.com',
-      password: 'senha123',
+      password: hashedPassword,
       userRole: UserRole.RESTAURANT,
       cnpj: '98.765.432/0001-10',
     },
@@ -40,7 +44,7 @@ async function main() {
     data: {
       name: 'Fornecedor Alimentos',
       email: 'vendas@fornecedor.com',
-      password: 'senha123',
+      password: hashedPassword,
       userRole: UserRole.SUPPLIER,
       cnpj: '11.222.333/0001-44',
       products: {
@@ -100,12 +104,12 @@ async function main() {
     },
   })
 
-  console.log('Seed concluído com sucesso!')
+  console.log('Seed successfully completed!')
 }
 
 main()
   .catch((e) => {
-    console.error('Erro ao executar o seed:', e)
+    console.error('Error running seed:', e)
     process.exit(1)
   })
   .finally(async () => {
